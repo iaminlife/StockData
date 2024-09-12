@@ -1,4 +1,4 @@
-const apiKey = 'NTB2LIKDMQ9N9SEX'; // API Key ของคุณ
+const apiKey = 'NTB2LIKDMQ9N9SEX'; // Your API Key
 const stockSymbols = ['SOXX', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
 const colors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 205, 86, 1)'];
 let stockChart;
@@ -21,16 +21,22 @@ function updateStockDetails(symbol) {
             }
 
             const latestPrice = data['05. price'];
+            const previousClose = data['08. previous close'];
             const change24h = data['09. change'];
             const change24hPercent = data['10. change percent'];
 
             document.getElementById('latestPrice').textContent = `$${latestPrice}`;
             document.getElementById('change24h').textContent = `${change24hPercent}`;
             
-            // ข้อมูลที่แสดงจะถูกตั้งเป็น 'N/A' เนื่องจากข้อมูลจาก GLOBAL_QUOTE ไม่รวมถึงช่วงเวลาอื่น
+            // Set placeholders for longer-term changes as GLOBAL_QUOTE does not provide this data
             document.getElementById('change7d').textContent = 'N/A';
             document.getElementById('change1m').textContent = 'N/A';
             document.getElementById('change3m').textContent = 'N/A';
+            
+            // Since we cannot plot historical data with GLOBAL_QUOTE, we skip chart plotting
+            if (stockChart) {
+                stockChart.destroy();
+            }
         });
 }
 
@@ -56,10 +62,10 @@ function createChart(labels, prices, color, label) {
     });
 }
 
-// เริ่มต้นแสดงข้อมูลเมื่อโหลดหน้า
+// Initialize with default stock symbol
 updateStockDetails('SOXX');
 
-// ฟังการเปลี่ยนแปลงของการเลือกหุ้น
+// Listen for stock selection change
 document.getElementById('stockSelect').addEventListener('change', (event) => {
     updateStockDetails(event.target.value);
 });
