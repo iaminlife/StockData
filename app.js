@@ -1,32 +1,40 @@
-const apiKey = 'NTB2LIKDMQ9N9SEX'; // Your API Key
+const apiKey = 'NTB2LIKDMQ9N9SEX'; // เปลี่ยนเป็น API Key ของคุณ
 const stockSymbols = ['SOXX', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
 const colors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 205, 86, 1)'];
 let stockChart;
 
 function fetchStockData(symbol) {
-    const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`;
+    const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
     return fetch(apiUrl)
         .then(response => response.json())
-        .then(data => data['Time Series (5min)'])
+        .then(data => data['Time Series (Daily)'])
         .catch(error => console.error('Error fetching data:', error));
 }
 
-function updateStockDetails(symbol) {
+function calculateChangePercentage(data, periodDays) {
+    const dates = Object.keys(data);
+    const endDate = dates[0];
+    const startDate = dates[periodDays - 1];
+    
+    if (!startDate) return null;
+
+    const endPrice = parseFloat(data[endDate]['4. close']);
+    const startPrice = parseFloat(data[startDate]['4. close']);
+    
+    return ((endPrice - startPrice) / startPrice * 100).toFixed(2);
+}
+
+function updateChart(symbol) {
     fetchStockData(symbol)
         .then(data => {
-            if (!data) {
-                console.error('No data received');
-                return;
+            const labels = [];
+            const prices = [];
+
+            for (let date in data) {
+                labels.push(date);
+                prices.push(data[date]['4. close']);
             }
-
-            // Extract the most recent 7 days of data
-            const dates = Object.keys(data);
-            dates.sort((a, b) => new Date(b) - new Date(a)); // Sort dates in descending order
-
-            const recentDates = dates.slice(0, 7 * 6); // 7 days * 6 intervals per hour
-            const labels = recentDates.reverse(); // Reversed for chronological order
-            const prices = labels.map(date => data[date]['4. close']);
 
             const colorIndex = stockSymbols.indexOf(symbol);
             const color = colors[colorIndex];
@@ -35,21 +43,15 @@ function updateStockDetails(symbol) {
                 stockChart.destroy();
             }
 
-            createChart(labels, prices, color, symbol);
+            createChart(labels.reverse(), prices.reverse(), color, symbol);
 
-            // Use the most recent data for displaying stock details
-            const latestPrice = prices[prices.length - 1]; // Latest price is the last in the reversed array
-            const previousPrice = prices[0]; // Previous price is the first in the reversed array
-
-            const changePercentage = ((latestPrice - previousPrice) / previousPrice * 100).toFixed(2);
-
+            // Update stock details
+            const latestPrice = prices[0];
             document.getElementById('latestPrice').textContent = `$${latestPrice}`;
-            document.getElementById('change24h').textContent = `${changePercentage}%`;
-
-            // Placeholder for longer-term changes as intraday data does not provide this information
-            document.getElementById('change7d').textContent = 'N/A';
-            document.getElementById('change1m').textContent = 'N/A';
-            document.getElementById('change3m').textContent = 'N/A';
+            document.getElementById('change24h').textContent = `${calculateChangePercentage(data, 1)}%`;
+            document.getElementById('change7d').textContent = `${calculateChangePercentage(data, 7)}%`;
+            document.getElementById('change1m').textContent = `${calculateChangePercentage(data, 30)}%`;
+            document.getElementById('change3m').textContent = `${calculateChangePercentage(data, 90)}%`;
         });
 }
 
@@ -75,10 +77,10 @@ function createChart(labels, prices, color, label) {
     });
 }
 
-// Initialize with default stock symbol
-updateStockDetails('SOXX');
+// เริ่มต้นกราฟเมื่อโหลดหน้า
+updateChart('SOXX');
 
-// Listen for stock selection change
+// ฟังการเปลี่ยนแปลงของการเลือกหุ้น
 document.getElementById('stockSelect').addEventListener('change', (event) => {
-    updateStockDetails(event.target.value);
+    updateChart(event.target.value);
 });
