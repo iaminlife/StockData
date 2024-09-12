@@ -6,8 +6,6 @@ let stockCharts = {};
 
 function fetchStockData(symbol) {
     const apiUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
-    
-    console.log(`Fetching data for symbol: ${symbol}`); // Debugging
 
     return fetch(apiUrl)
         .then(response => response.json())
@@ -26,16 +24,11 @@ function updateStockDetails(symbol, chartId, color) {
             // Extract last price, previous close, and change percent from the data
             const latestPrice = parseFloat(data['05. price']);
             const previousClose = parseFloat(data['08. previous close']);
-            const changePercent = data['10. change percent']; // Use the percentage directly from API
-
-            if (isNaN(latestPrice) || isNaN(previousClose)) {
-                console.error('Invalid price data for', symbol);
-                return;
-            }
+            const changePercent = data['10. change percent']; // Get the percentage change directly
 
             // Update the HTML with the latest price and percentage change
             document.getElementById(`${symbol.toLowerCase()}Price`).textContent = `$${latestPrice}`;
-            document.getElementById(`${symbol.toLowerCase()}Change`).textContent = changePercent;
+            document.getElementById(`${symbol.toLowerCase()}ChangePercent`).textContent = changePercent;
 
             // Create or update the chart
             const ctx = document.getElementById(chartId).getContext('2d');
@@ -65,8 +58,7 @@ function updateStockDetails(symbol, chartId, color) {
 
             // Log the latest price and percentage change
             console.log(`${symbol} - Latest Price: $${latestPrice}, Change from Yesterday: ${changePercent}`);
-        })
-        .catch(error => console.error('Error updating stock details:', error));
+        });
 }
 
 // Initialize charts and display last price + percentage change for all stocks
