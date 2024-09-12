@@ -8,21 +8,29 @@
 </head>
 <body>
     <h1>Stock Market Data</h1>
-    <select id="stockSelect">
-        <option value="SOXX">SOXX</option>
-        <option value="VNQI">VNQI</option>
-        <option value="ABBV">ABBV</option>
-        <option value="CAMT">CAMT</option>
-        <option value="MSFT">MSFT</option>
-    </select>
-    <canvas id="stockChart"></canvas>
-    <div id="stockDetails">
-        <p>Latest Price: <span id="latestPrice"></span></p>
-        <p>Change (24h): <span id="change24h"></span></p>
-        <p>Change (7d): <span id="change7d"></span></p>
-        <p>Change (1m): <span id="change1m"></span></p>
-        <p>Change (3m): <span id="change3m"></span></p>
+    <div id="charts">
+        <div>
+            <h2>SOXX</h2>
+            <canvas id="soxxChart"></canvas>
+        </div>
+        <div>
+            <h2>VNQI</h2>
+            <canvas id="vnqiChart"></canvas>
+        </div>
+        <div>
+            <h2>ABBV</h2>
+            <canvas id="abbvChart"></canvas>
+        </div>
+        <div>
+            <h2>CAMT</h2>
+            <canvas id="camtChart"></canvas>
+        </div>
+        <div>
+            <h2>MSFT</h2>
+            <canvas id="msftChart"></canvas>
+        </div>
     </div>
+
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
