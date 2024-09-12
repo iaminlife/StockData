@@ -1,4 +1,4 @@
-const apiKey = 'NTB2LIKDMQ9N9SEX'; // Your API Key
+const apiKey = 'M7EWZ831WBN20B0S'; // Your API Key
 const stockSymbols = ['SOXX', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
 const colors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 205, 86, 1)'];
 let stockCharts = {};
