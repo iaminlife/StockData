@@ -1,6 +1,6 @@
 // ดึงข้อมูลจาก Alpha Vantage API
-const apiKey = 'YOUR_API_KEY';
-const stockSymbol = 'AAPL'; // สัญลักษณ์หุ้นที่ต้องการ
+const apiKey = 'NTB2LIKDMQ9N9SEX';
+const stockSymbol = 'SOXX'; // สัญลักษณ์หุ้นที่ต้องการ
 const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockSymbol}&apikey=${apiKey}`;
 
 fetch(apiUrl)
