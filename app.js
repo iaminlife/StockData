@@ -28,9 +28,12 @@ function updateStockDetails(symbol, chartId, color) {
             // Calculate the percentage change from yesterday's close
             const changePercent = ((latestPrice - previousClose) / previousClose * 100).toFixed(2);
 
+            // Ensure the symbol is lowercase when updating the HTML
+            const lowerSymbol = symbol.toLowerCase();
+
             // Update the HTML with the latest price and percentage change
-            document.getElementById(`${symbol.toLowerCase()}Price`).textContent = `$${latestPrice}`;
-            document.getElementById(`${symbol.toLowerCase()}Change`).textContent = `${changePercent}%`;
+            document.getElementById(`${lowerSymbol}Price`).textContent = `$${latestPrice}`;
+            document.getElementById(`${lowerSymbol}Change`).textContent = `${changePercent}%`;
 
             // Create or update the chart
             const ctx = document.getElementById(chartId).getContext('2d');
@@ -62,11 +65,3 @@ function updateStockDetails(symbol, chartId, color) {
             console.log(`${symbol} - Latest Price: $${latestPrice}, Change from Yesterday: ${changePercent}%`);
         });
 }
-
-// Initialize charts and display last price + percentage change for all stocks
-stockSymbols.forEach((symbol, index) => {
-    const chartId = chartIds[index];
-    const color = colors[index];
-
-    updateStockDetails(symbol, chartId, color);
-});
