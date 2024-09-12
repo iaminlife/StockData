@@ -1,6 +1,5 @@
 <!DOCTYPE html>
 <html lang="en">
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
@@ -9,7 +8,17 @@
 </head>
 <body>
     <h1>Stock Market Data</h1>
-    <canvas id="stockChart"></canvas>
+    
+    <!-- สร้างพื้นที่แสดงกราฟ -->
+    <div id="charts">
+        <canvas id="chart_SOXX"></canvas>
+        <canvas id="chart_VNQI"></canvas>
+        <canvas id="chart_ABBV"></canvas>
+        <canvas id="chart_CAMT"></canvas>
+        <canvas id="chart_MSFT"></canvas>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script src="app.js"></script>
 </body>
 </html>
