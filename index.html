@@ -3,22 +3,38 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Chart</title>
+    <title>Stock Charts</title>
     <link rel="stylesheet" href="style.css">
 </head>
 <body>
     <h1>Stock Market Data</h1>
-    
-    <!-- สร้างพื้นที่แสดงกราฟ -->
-    <div id="charts">
-        <canvas id="chart_SOXX"></canvas>
-        <canvas id="chart_VNQI"></canvas>
-        <canvas id="chart_ABBV"></canvas>
-        <canvas id="chart_CAMT"></canvas>
-        <canvas id="chart_MSFT"></canvas>
+
+    <div>
+        <h2>SOXX</h2>
+        <canvas id="stockChartSOXX"></canvas>
     </div>
 
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <div>
+        <h2>VNQI</h2>
+        <canvas id="stockChartVNQI"></canvas>
+    </div>
+
+    <div>
+        <h2>ABBV</h2>
+        <canvas id="stockChartABBV"></canvas>
+    </div>
+
+    <div>
+        <h2>CAMT</h2>
+        <canvas id="stockChartCAMT"></canvas>
+    </div>
+
+    <div>
+        <h2>MSFT</h2>
+        <canvas id="stockChartMSFT"></canvas>
+    </div>
+
     <script src="app.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </body>
 </html>
