@@ -3,28 +3,87 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Stock Charts</title>
-    <link rel="stylesheet" href="style.css">
+    <title>Stock Chart</title>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
 </head>
 <body>
-    <h1>Stock Market Data</h1>
     <select id="stockSelect">
-        <option value="XAU">SOXX</option>
         <option value="SOXX">SOXX</option>
         <option value="VNQI">VNQI</option>
         <option value="ABBV">ABBV</option>
         <option value="CAMT">CAMT</option>
         <option value="MSFT">MSFT</option>
     </select>
-    <canvas id="stockChart"></canvas>
-    <div id="stockDetails">
-        <p>Latest Price: <span id="latestPrice"></span></p>
-        <p>Change (24h): <span id="change24h"></span></p>
-        <p>Change (7d): <span id="change7d"></span></p>
-        <p>Change (1m): <span id="change1m"></span></p>
-        <p>Change (3m): <span id="change3m"></span></p>
+
+    <canvas id="stockChart" width="400" height="200"></canvas>
+    
+    <div>
+        <p>Latest Price: <span id="latestPrice">$0</span></p>
+        <p>Change (24h): <span id="change24h">0%</span></p>
+        <p>Change (7d): <span id="change7d">0%</span></p>
+        <p>Change (1m): <span id="change1m">N/A</span></p>
+        <p>Change (3m): <span id="change3m">N/A</span></p>
     </div>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-    <script src="app.js"></script>
-</body>
-</html>
+
+    <script>
+        const apiKey = 'YOUR_API_KEY'; // เปลี่ยนเป็น API Key ของคุณ
+        const stockSymbols = ['SOXX', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
+        const colors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 205, 86, 1)'];
+        let stockChart;
+
+        function fetchStockData(symbol) {
+            const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
+
+            return fetch(apiUrl)
+                .then(response => response.json())
+                .then(data => {
+                    console.log(data); // ตรวจสอบข้อมูลที่ได้รับ
+                    return data['Time Series (Daily)'];
+                })
+                .catch(error => console.error('Error fetching data:', error));
+        }
+
+        function calculateChangePercentage(data, startDate, endDate) {
+            const startPrice = parseFloat(data[startDate]['4. close']);
+            const endPrice = parseFloat(data[endDate]['4. close']);
+
+            if (isNaN(startPrice) || isNaN(endPrice)) return 'N/A';
+
+            return ((endPrice - startPrice) / startPrice * 100).toFixed(2);
+        }
+
+        function updateChart(symbol) {
+            fetchStockData(symbol)
+                .then(data => {
+                    if (!data) {
+                        console.error('No data received');
+                        return;
+                    }
+
+                    const dates = Object.keys(data);
+                    dates.sort((a, b) => new Date(b) - new Date(a));
+                    const recentDates = dates.slice(0, 7);
+                    const labels = recentDates;
+                    const prices = recentDates.map(date => data[date]['4. close']);
+
+                    if (prices.length === 0) {
+                        console.error('No price data available');
+                        return;
+                    }
+
+                    const colorIndex = stockSymbols.indexOf(symbol);
+                    const color = colors[colorIndex];
+
+                    if (stockChart) {
+                        stockChart.destroy();
+                    }
+
+                    createChart(labels.reverse(), prices.reverse(), color, symbol);
+
+                    const latestPrice = prices[prices.length - 1];
+                    const change24h = calculateChangePercentage(data, recentDates[recentDates.length - 2], recentDates[recentDates.length - 1]);
+
+                    document.getElementById('latestPrice').textContent = `$${latestPrice}`;
+                    document.getElementById('change24h').textContent = `${change24h}%`;
+                    document.getElementById('change7d').textContent = `${calculateChangePercentage(data, recentDates[0], recentDates[recentDates.length - 1])}%`;
+                    document.getElem
