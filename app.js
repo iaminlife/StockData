@@ -1,33 +1,37 @@
 // ดึงข้อมูลจาก Alpha Vantage API
 const apiKey = 'NTB2LIKDMQ9N9SEX';
-const stockSymbol = 'SOXX'; // สัญลักษณ์หุ้นที่ต้องการ
-const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockSymbol}&apikey=${apiKey}`;
+const stockSymbols = ['SOXX', 'VNQI', 'ABBV', 'CAMT', 'MSFT']; // สัญลักษณ์หุ้นที่ต้องการ
 
-fetch(apiUrl)
-    .then(response => response.json())
-    .then(data => {
-        const timeSeries = data['Time Series (Daily)'];
-        const labels = [];
-        const prices = [];
+// ฟังก์ชันดึงข้อมูลหุ้น
+function fetchStockData(symbol) {
+    const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
 
-        for (let date in timeSeries) {
-            labels.push(date);
-            prices.push(timeSeries[date]['4. close']);
-        }
+    fetch(apiUrl)
+        .then(response => response.json())
+        .then(data => {
+            const timeSeries = data['Time Series (Daily)'];
+            const labels = [];
+            const prices = [];
 
-        createChart(labels.reverse(), prices.reverse()); // สร้างกราฟโดยใช้ข้อมูลที่ดึงมา
-    })
-    .catch(error => console.error('Error fetching data:', error));
+            for (let date in timeSeries) {
+                labels.push(date);
+                prices.push(timeSeries[date]['4. close']);
+            }
+
+            createChart(symbol, labels.reverse(), prices.reverse()); // สร้างกราฟโดยใช้ข้อมูลที่ดึงมา
+        })
+        .catch(error => console.error(`Error fetching data for ${symbol}:`, error));
+}
 
 // ฟังก์ชันสร้างกราฟ
-function createChart(labels, prices) {
-    const ctx = document.getElementById('stockChart').getContext('2d');
+function createChart(symbol, labels, prices) {
+    const ctx = document.getElementById(`chart_${symbol}`).getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: 'Stock Price',
+                label: `${symbol} Stock Price`,
                 data: prices,
                 borderColor: 'rgba(75, 192, 192, 1)',
                 fill: false
@@ -41,3 +45,6 @@ function createChart(labels, prices) {
         }
     });
 }
+
+// ดึงข้อมูลหุ้นทุกตัวที่กำหนด
+stockSymbols.forEach(symbol => fetchStockData(symbol));
