@@ -4,37 +4,41 @@ const colors = ['rgba(75, 192, 192, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 159
 let stockChart;
 
 function fetchStockData(symbol) {
-    const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
+    const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_INTRADAY&symbol=${symbol}&interval=5min&apikey=${apiKey}`;
 
     return fetch(apiUrl)
         .then(response => response.json())
-        .then(data => data['Time Series (Daily)'])
+        .then(data => data['Time Series (5min)'])
         .catch(error => console.error('Error fetching data:', error));
 }
 
-function calculateChangePercentage(data, periodDays) {
-    const dates = Object.keys(data);
-    const endDate = dates[0];
-    const startDate = dates[periodDays - 1];
-    
-    if (!startDate) return null;
+function calculateChangePercentage(data, startTime, endTime) {
+    const startData = data[startTime];
+    const endData = data[endTime];
 
-    const endPrice = parseFloat(data[endDate]['4. close']);
-    const startPrice = parseFloat(data[startDate]['4. close']);
-    
+    if (!startData || !endData) return 'N/A'; // ตรวจสอบว่าข้อมูลมีหรือไม่
+
+    const startPrice = parseFloat(startData['4. close']);
+    const endPrice = parseFloat(endData['4. close']);
+
+    if (isNaN(startPrice) || isNaN(endPrice)) return 'N/A'; // ตรวจสอบว่า startPrice และ endPrice มีค่าหรือไม่
+
     return ((endPrice - startPrice) / startPrice * 100).toFixed(2);
 }
 
 function updateChart(symbol) {
     fetchStockData(symbol)
         .then(data => {
-            const labels = [];
-            const prices = [];
-
-            for (let date in data) {
-                labels.push(date);
-                prices.push(data[date]['4. close']);
+            if (!data) {
+                console.error('No data received');
+                return;
             }
+
+            const timestamps = Object.keys(data);
+            timestamps.sort((a, b) => new Date(b) - new Date(a)); // เรียงลำดับตามเวลา
+
+            const labels = timestamps.slice(0, 20); // ใช้ข้อมูลล่าสุด 20 ช่วงเวลา
+            const prices = labels.map(timestamp => data[timestamp]['4. close']);
 
             const colorIndex = stockSymbols.indexOf(symbol);
             const color = colors[colorIndex];
@@ -43,15 +47,17 @@ function updateChart(symbol) {
                 stockChart.destroy();
             }
 
-            createChart(labels.reverse(), prices.reverse(), color, symbol);
+            createChart(labels, prices, color, symbol);
 
-            // Update stock details
-            const latestPrice = prices[0];
-            document.getElementById('latestPrice').textContent = `$${latestPrice}`;
-            document.getElementById('change24h').textContent = `${calculateChangePercentage(data, 1)}%`;
-            document.getElementById('change7d').textContent = `${calculateChangePercentage(data, 7)}%`;
-            document.getElementById('change1m').textContent = `${calculateChangePercentage(data, 30)}%`;
-            document.getElementById('change3m').textContent = `${calculateChangePercentage(data, 90)}%`;
+            // ใช้ข้อมูลล่าสุดในการคำนวณการเปลี่ยนแปลง
+            const latestTimestamp = timestamps[0];
+            const earliestTimestamp = timestamps[timestamps.length - 1];
+
+            document.getElementById('latestPrice').textContent = `$${prices[0]}`;
+            document.getElementById('change24h').textContent = `${calculateChangePercentage(data, earliestTimestamp, latestTimestamp)}%`;
+            document.getElementById('change7d').textContent = 'N/A'; // ข้อมูล 7 วันไม่สามารถดึงจากช่วงเวลานี้ได้
+            document.getElementById('change1m').textContent = 'N/A'; // ข้อมูล 1 เดือนไม่สามารถดึงจากช่วงเวลานี้ได้
+            document.getElementById('change3m').textContent = 'N/A'; // ข้อมูล 3 เดือนไม่สามารถดึงจากช่วงเวลานี้ได้
         });
 }
 
