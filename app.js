@@ -1,11 +1,20 @@
+// ใส่หุ้นที่ต้องการดึงข้อมูล
+const stockSymbols = ['SOXX', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
 const apiKey = 'NTB2LIKDMQ9N9SEX';
-const stockSymbols = ['SOXX', 'VNQI', 'ABBV', 'CAMT', 'MSFT']; // สัญลักษณ์หุ้นที่ต้องการ
 
-// ลูปเพื่อดึงข้อมูลและสร้างกราฟสำหรับแต่ละหุ้น
-stockSymbols.forEach(symbol => {
-    const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${symbol}&apikey=${apiKey}`;
-    
-    fetch(apiUrl)
+// สีที่กำหนดให้แต่ละหุ้น
+const stockColors = {
+    'SOXX': 'rgba(255, 99, 132, 1)',
+    'VNQI': 'rgba(54, 162, 235, 1)',
+    'ABBV': 'rgba(255, 206, 86, 1)',
+    'CAMT': 'rgba(75, 192, 192, 1)',
+    'MSFT': 'rgba(153, 102, 255, 1)'
+};
+
+// ฟังก์ชันดึงข้อมูลหุ้นจาก API
+function fetchStockData(stockSymbol) {
+    const apiUrl = `https://www.alphavantage.co/query?function=TIME_SERIES_DAILY&symbol=${stockSymbol}&apikey=${apiKey}`;
+    return fetch(apiUrl)
         .then(response => response.json())
         .then(data => {
             const timeSeries = data['Time Series (Daily)'];
@@ -17,22 +26,21 @@ stockSymbols.forEach(symbol => {
                 prices.push(timeSeries[date]['4. close']);
             }
 
-            createChart(symbol, labels.reverse(), prices.reverse()); // สร้างกราฟสำหรับแต่ละหุ้น
-        })
-        .catch(error => console.error('Error fetching data:', error));
-});
+            return { labels: labels.reverse(), prices: prices.reverse() }; // รีเวิร์สข้อมูลเพื่อเรียงจากเก่ามาใหม่
+        });
+}
 
 // ฟังก์ชันสร้างกราฟ
-function createChart(symbol, labels, prices) {
-    const ctx = document.getElementById(`stockChart${symbol}`).getContext('2d');
+function createChart(stockSymbol, labels, prices) {
+    const ctx = document.getElementById(`${stockSymbol}Chart`).getContext('2d');
     new Chart(ctx, {
         type: 'line',
         data: {
             labels: labels,
             datasets: [{
-                label: `${symbol} Stock Price`,
+                label: `${stockSymbol} Stock Price`,
                 data: prices,
-                borderColor: 'rgba(75, 192, 192, 1)',
+                borderColor: stockColors[stockSymbol], // สีของแต่ละหุ้น
                 fill: false
             }]
         },
@@ -44,3 +52,12 @@ function createChart(symbol, labels, prices) {
         }
     });
 }
+
+// เรียกฟังก์ชันเพื่อดึงข้อมูลและสร้างกราฟสำหรับแต่ละหุ้น
+stockSymbols.forEach(stockSymbol => {
+    fetchStockData(stockSymbol)
+        .then(data => {
+            createChart(stockSymbol, data.labels, data.prices); // สร้างกราฟเมื่อดึงข้อมูลเสร็จ
+        })
+        .catch(error => console.error(`Error fetching data for ${stockSymbol}:`, error));
+});
