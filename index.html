@@ -9,32 +9,16 @@
 <body>
     <h1>Stock Market Data</h1>
 
-    <div>
-        <h2>SOXX</h2>
-        <canvas id="stockChartSOXX"></canvas>
+    <!-- แสดงกราฟแต่ละหุ้น -->
+    <div id="charts">
+        <canvas id="SOXXChart"></canvas>
+        <canvas id="VNQIChart"></canvas>
+        <canvas id="ABBVChart"></canvas>
+        <canvas id="CAMTChart"></canvas>
+        <canvas id="MSFTChart"></canvas>
     </div>
 
-    <div>
-        <h2>VNQI</h2>
-        <canvas id="stockChartVNQI"></canvas>
-    </div>
-
-    <div>
-        <h2>ABBV</h2>
-        <canvas id="stockChartABBV"></canvas>
-    </div>
-
-    <div>
-        <h2>CAMT</h2>
-        <canvas id="stockChartCAMT"></canvas>
-    </div>
-
-    <div>
-        <h2>MSFT</h2>
-        <canvas id="stockChartMSFT"></canvas>
-    </div>
-
-    <script src="app.js"></script>
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script src="app.js"></script>
 </body>
 </html>
