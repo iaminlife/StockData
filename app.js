@@ -1,15 +1,20 @@
 const apiKey = 'M7EWZ831WBN20B0S'; // Your API Key
-const stockSymbols = ['SOXX', 'XAUUSD', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
+const stockSymbols = ['SOXX', 'XAU', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
 const chartIds = ['soxxChart', 'xauChart', 'vnqiChart', 'abbvChart', 'camtChart', 'msftChart'];
 const colors = ['rgba(75, 192, 192, 1)', 'rgba(255, 215, 0, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 205, 86, 1)'];
 let stockCharts = {};
 
 function fetchStockData(symbol) {
     const apiUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+    
+    console.log(`Fetching data for symbol: ${symbol}`); // Debugging
 
     return fetch(apiUrl)
         .then(response => response.json())
-        .then(data => data['Global Quote'])
+        .then(data => {
+            console.log(`API Response for ${symbol}:`, data); // Log API response
+            return data['Global Quote'];
+        })
         .catch(error => console.error('Error fetching data:', error));
 }
 
@@ -24,6 +29,11 @@ function updateStockDetails(symbol, chartId, color) {
             // Extract last price and previous close from the data
             const latestPrice = parseFloat(data['05. price']);
             const previousClose = parseFloat(data['08. previous close']);
+
+            if (isNaN(latestPrice) || isNaN(previousClose)) {
+                console.error('Invalid price data for', symbol);
+                return;
+            }
 
             // Calculate the percentage change from yesterday's close
             const changePercent = ((latestPrice - previousClose) / previousClose * 100).toFixed(2);
@@ -63,5 +73,14 @@ function updateStockDetails(symbol, chartId, color) {
 
             // Log the latest price and percentage change
             console.log(`${symbol} - Latest Price: $${latestPrice}, Change from Yesterday: ${changePercent}%`);
-        });
+        })
+        .catch(error => console.error('Error updating stock details:', error));
 }
+
+// Initialize charts and display last price + percentage change for all stocks
+stockSymbols.forEach((symbol, index) => {
+    const chartId = chartIds[index];
+    const color = colors[index];
+
+    updateStockDetails(symbol, chartId, color);
+});
