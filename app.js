@@ -1,67 +1,83 @@
-const apiKey = 'M7EWZ831WBN20B0S'; // Your API Key
+const apiKey = 'edacab4eb3mshbbf1f0f5f694ef8p1db1dfjsn6fcc156a7a94'; // New API Key from RapidAPI
 const stockSymbols = ['SOXX', 'XAUUSD', 'VNQI', 'ABBV', 'CAMT', 'MSFT'];
 const chartIds = ['soxxChart', 'xauChart', 'vnqiChart', 'abbvChart', 'camtChart', 'msftChart'];
 const colors = ['rgba(75, 192, 192, 1)', 'rgba(255, 215, 0, 1)', 'rgba(255, 99, 132, 1)', 'rgba(255, 159, 64, 1)', 'rgba(153, 102, 255, 1)', 'rgba(255, 205, 86, 1)'];
 let stockCharts = {};
 
-function fetchStockData(symbol) {
-    const apiUrl = `https://www.alphavantage.co/query?function=GLOBAL_QUOTE&symbol=${symbol}&apikey=${apiKey}`;
+async function fetchStockData(symbol) {
+    const apiUrl = `https://alpha-vantage.p.rapidapi.com/query?function=TIME_SERIES_DAILY&symbol=${symbol}&outputsize=compact&datatype=json`;
+    const options = {
+        method: 'GET',
+        headers: {
+            'x-rapidapi-key': apiKey,
+            'x-rapidapi-host': 'alpha-vantage.p.rapidapi.com'
+        }
+    };
 
-    return fetch(apiUrl)
-        .then(response => response.json())
-        .then(data => data['Global Quote'])
-        .catch(error => console.error('Error fetching data:', error));
+    try {
+        const response = await fetch(apiUrl, options);
+        const data = await response.json();
+        return data['Time Series (Daily)'];
+    } catch (error) {
+        console.error('Error fetching data:', error);
+    }
 }
 
-function updateStockDetails(symbol, chartId, color) {
-    fetchStockData(symbol)
-        .then(data => {
-            if (!data) {
-                console.error('No data received for', symbol);
-                return;
-            }
+async function updateStockDetails(symbol, chartId, color) {
+    const data = await fetchStockData(symbol);
 
-            // Extract last price, previous close, and change percent from the data
-            const latestPrice = parseFloat(data['05. price']);
-            const previousClose = parseFloat(data['08. previous close']);
-            const changePercent = data['10. change percent']; // Get the percentage change directly
+    if (!data) {
+        console.error('No data received for', symbol);
+        return;
+    }
 
-            // Update the HTML with the latest price and percentage change
-            document.getElementById(`${symbol.toLowerCase()}Price`).textContent = `$${latestPrice}`;
-            document.getElementById(`${symbol.toLowerCase()}ChangePercent`).textContent = changePercent;
+    // Extract the last 7 days of data
+    const dates = Object.keys(data).slice(0, 7).reverse();
+    const prices = dates.map(date => parseFloat(data[date]['4. close']));
 
-            // Create or update the chart
-            const ctx = document.getElementById(chartId).getContext('5d');
+    // Ensure the chart is created or updated
+    const ctx = document.getElementById(chartId).getContext('2d');
 
-            if (stockCharts[chartId]) {
-                stockCharts[chartId].destroy(); // Destroy previous chart if it exists
-            }
+    if (stockCharts[chartId]) {
+        stockCharts[chartId].destroy(); // Destroy previous chart if it exists
+    }
 
-            stockCharts[chartId] = new Chart(ctx, {
-                type: 'line',
-                data: {
-                    labels: ['Yesterday', 'Today'],
-                    datasets: [{
-                        label: `${symbol} Last Price: $${latestPrice}`,
-                        data: [previousClose, latestPrice],
-                        borderColor: color,
-                        fill: false
-                    }]
+    stockCharts[chartId] = new Chart(ctx, {
+        type: 'line',
+        data: {
+            labels: dates,
+            datasets: [{
+                label: `${symbol} Last 7 Days`,
+                data: prices,
+                borderColor: color,
+                fill: false
+            }]
+        },
+        options: {
+            scales: {
+                x: { 
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Date'
+                    }
                 },
-                options: {
-                    scales: {
-                        x: { display: true },
-                        y: { display: true }
+                y: { 
+                    display: true,
+                    title: {
+                        display: true,
+                        text: 'Price'
                     }
                 }
-            });
+            }
+        }
+    });
 
-            // Log the latest price and percentage change
-            console.log(`${symbol} - Latest Price: $${latestPrice}, Change from Yesterday: ${changePercent}`);
-        });
+    // Log the latest prices for verification
+    console.log(`${symbol} - Prices for Last 7 Days: ${prices}`);
 }
 
-// Initialize charts and display last price + percentage change for all stocks
+// Initialize charts and display 7-day historical data for all stocks
 stockSymbols.forEach((symbol, index) => {
     const chartId = chartIds[index];
     const color = colors[index];
