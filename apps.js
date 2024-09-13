@@ -8,7 +8,7 @@ async function fetchStockData() {
     } catch (error) {
         console.error('Error fetching stock data from API:', error);
     }
-}
+} 
 
 async function updateStockDetailsFromAPI(symbol, chartId, color) {
     const stockData = await fetchStockData();
