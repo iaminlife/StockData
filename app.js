@@ -31,7 +31,7 @@ function updateStockDetails(symbol, chartId, color) {
             document.getElementById(`${symbol.toLowerCase()}ChangePercent`).textContent = changePercent;
 
             // Create or update the chart
-            const ctx = document.getElementById(chartId).getContext('7d');
+            const ctx = document.getElementById(chartId).getContext('5d');
 
             if (stockCharts[chartId]) {
                 stockCharts[chartId].destroy(); // Destroy previous chart if it exists
